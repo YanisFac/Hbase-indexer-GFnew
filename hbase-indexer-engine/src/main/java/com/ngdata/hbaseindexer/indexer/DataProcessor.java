@@ -2,6 +2,7 @@ package com.ngdata.hbaseindexer.indexer;
 
 import org.apache.solr.common.SolrInputDocument;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -44,19 +45,20 @@ public class DataProcessor {
     * */
     }
 
-    public String Convert2Solr(String date, String format){
+    public static String Convert2Solr(String date, String format) {
         String value = "";
         try {
-            SimpleDateFormat fmt = new SimpleDateFormat(format);
+            DateFormat fmt = new SimpleDateFormat(format);
             Date _date = fmt.parse(date);
-            val calendar = Calendar.getInstance;
-            calendar.setTime(_date)
-            calendar.add(10, -8)
-            val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ROOT)
-            value = df.format(calendar.getTime)
-        } catch {
-            case var7: Exception =>
+            ;
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(_date);
+            calendar.add(Calendar.HOUR, -8);
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ROOT);
+            value = df.format(calendar.getTime());
+        } catch (Exception e) {
         }
-        value
+        return value;
     }
+
 }
