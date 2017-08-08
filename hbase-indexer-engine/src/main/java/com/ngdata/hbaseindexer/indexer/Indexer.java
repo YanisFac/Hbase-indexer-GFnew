@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import com.ngdata.hbaseindexer.indexer.DataProcessor;
 import static com.ngdata.hbaseindexer.metrics.IndexerMetricsUtil.metricName;
 
 /**
@@ -150,18 +151,30 @@ public abstract class Indexer {
                     updateCollector.getDocumentsToAdd().size(), updateCollector.getIdsToDelete().size()));
         }
 
+        Map<String, SolrInputDocument> addDataMap ;
+        Map<String, SolrInputDocument> modifiedAddDataMap ;
+
+        if(!updateCollector.getDocumentsToAdd().isEmpty()) {
+            Map<String, SolrInputDocument> updateContent = updateCollector.getDocumentsToAdd();
+            addDataMap = updateContent;
+            DataProcessor dataProcessor = new DataProcessor(addDataMap, rowDataList);
+            modifiedAddDataMap = dataProcessor.dealWithInputData();
+        }else{modifiedAddDataMap = null;}
+
         if (sharder == null) {
             // don't shard
-            if (!updateCollector.getDocumentsToAdd().isEmpty()) {
-                solrWriter.add(-1, updateCollector.getDocumentsToAdd());
+            if (modifiedAddDataMap != null && !modifiedAddDataMap.isEmpty()) {
+                //solrWriter.add(-1, updateCollector.getDocumentsToAdd());
+                solrWriter.add(-1, modifiedAddDataMap);
             }
             if (!updateCollector.getIdsToDelete().isEmpty()) {
                 solrWriter.deleteById(-1, updateCollector.getIdsToDelete());
             }
         } else {
             // with sharding
-            if (!updateCollector.getDocumentsToAdd().isEmpty()) {
-                Map<Integer, Map<String, SolrInputDocument>> addsByShard = shardByMapKey(updateCollector.getDocumentsToAdd());
+            if (modifiedAddDataMap != null && !modifiedAddDataMap.isEmpty()) {
+                //Map<Integer, Map<String, SolrInputDocument>> addsByShard = shardByMapKey(updateCollector.getDocumentsToAdd());
+                Map<Integer, Map<String, SolrInputDocument>> addsByShard = shardByMapKey(modifiedAddDataMap);
                 for (Map.Entry<Integer, Map<String, SolrInputDocument>> entry : addsByShard.entrySet()) {
                     solrWriter.add(entry.getKey(), entry.getValue());
                 }
