@@ -139,6 +139,7 @@ public abstract class Indexer {
      * @param rowDataList list of RowData instances to be considered for indexing
      */
     public void indexRowData(List<RowData> rowDataList) throws IOException, SolrServerException, SharderException {
+        log.info(String.format("The size of update Buffer is : ", rowDataList.size()));
         SolrUpdateCollector updateCollector = new SolrUpdateCollector(rowDataList.size());
         TimerContext timerContext = indexingTimer.time();
         try {
